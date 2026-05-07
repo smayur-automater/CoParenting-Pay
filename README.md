@@ -1,115 +1,158 @@
-# CoParenting Pay
-> Child cost split calculator — enter expenses, split fairly, share instantly.
+# SnapClaim AU 🧾
 
-**Stack:** React (Vite) · Node/Express · Supabase · Stripe · Vercel
+**AI-powered receipt → tax deduction tracker for Australian freelancers and sole traders.**
+
+Snap a receipt → Claude reads it → instant ATO deduction estimate. Auto-categorised, dashboard-ready, CSV-exportable.
 
 ---
 
-## What it does
-1. Enter child expenses with descriptions and amounts
-2. Set split ratio (50/50, 70/30, or any custom %)
-3. Instantly see who owes what
-4. Sign in (email) to save and access history for 7 years
-5. Share a read-only link with co-parent
-6. One-time $4.99 unlocks PDF export for any calculation
+## Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| AI / OCR | Anthropic Claude (`claude-sonnet-4`) |
+| Database | Supabase (PostgreSQL + Auth + RLS) |
+| Charts | Recharts |
+| Hosting | Vercel |
+
+---
+
+## Quick start (local)
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up environment variables
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` and fill in:
+- `ANTHROPIC_API_KEY` — from [console.anthropic.com](https://console.anthropic.com)
+- `NEXT_PUBLIC_SUPABASE_URL` — from your Supabase project settings
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from your Supabase project settings
+
+### 3. Set up Supabase
+
+1. Create a free project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the contents of `supabase/schema.sql`
+3. This creates: `receipts`, `tax_profiles`, `audit_log` tables with RLS enabled
+
+### 4. Run locally
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## Deploy to Vercel (recommended)
+
+### Option A: One-click deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+1. Push this repo to GitHub
+2. Import to Vercel
+3. Add environment variables in Vercel dashboard:
+   - `ANTHROPIC_API_KEY`
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Deploy
+
+### Option B: Vercel CLI
+
+```bash
+npm i -g vercel
+vercel
+# Follow prompts, then:
+vercel env add ANTHROPIC_API_KEY
+vercel env add NEXT_PUBLIC_SUPABASE_URL
+vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
+vercel --prod
+```
 
 ---
 
 ## Project structure
+
 ```
-coparentingpay/
-├── frontend/          React + Vite
-│   ├── src/
-│   │   ├── App.jsx        All screens (calculator, history, share, auth)
-│   │   ├── main.jsx       Entry point
-│   │   └── lib/
-│   │       └── supabase.js  Supabase client + API helpers
-│   ├── index.html
-│   └── vite.config.js
-│
-├── backend/           Node.js + Express
-│   └── src/
-│       └── index.js   All routes (calculations, PDF, Stripe checkout)
-│
+snapclaim/
+├── app/
+│   ├── api/
+│   │   ├── scan-receipt/route.ts   # Claude OCR endpoint
+│   │   ├── receipts/route.ts       # CRUD for receipts
+│   │   └── export-csv/route.ts     # ATO-ready CSV export
+│   ├── layout.tsx
+│   ├── page.tsx                    # Main app shell
+│   └── globals.css
+├── components/
+│   ├── SnapTab.tsx                 # Upload + AI scan UI
+│   ├── ReceiptsTab.tsx             # Receipt log
+│   ├── DashboardTab.tsx            # Stats + charts
+│   └── SettingsTab.tsx             # Tax profile + config
+├── lib/
+│   ├── tax.ts                      # ATO categories, deduction calc
+│   └── supabase.ts                 # Supabase client
+├── types/
+│   └── index.ts                    # TypeScript interfaces
 ├── supabase/
-│   └── migrations/
-│       └── 001_schema.sql   DB schema + RLS policies
-│
-└── vercel.json        Deployment config
+│   └── schema.sql                  # Database schema + RLS
+├── .env.example
+└── README.md
 ```
 
 ---
 
-## Setup
+## ATO categories supported
 
-### 1. Supabase
-1. Create project at [supabase.com](https://supabase.com)
-2. Run `supabase/migrations/001_schema.sql` in SQL Editor
-3. Enable **Email** auth under Authentication → Providers
-4. Create a Storage bucket named **`receipts`** (private)
-5. Copy your **Project URL** and **anon key**
-
-### 2. Stripe
-1. Create account at [stripe.com](https://stripe.com)
-2. Copy **Secret key** (`sk_live_...` or `sk_test_...`)
-3. Add webhook endpoint: `https://your-app.vercel.app/api/webhooks/stripe`
-   - Event: `checkout.session.completed`
-4. Copy **Webhook signing secret** (`whsec_...`)
-
-### 3. Local development
-```bash
-# Backend
-cd backend
-cp .env.example .env   # fill in values
-npm install
-npm run dev            # runs on :4000
-
-# Frontend (new terminal)
-cd frontend
-cp .env.example .env.local   # fill in values
-npm install
-npm run dev            # runs on :5173, proxies /api to :4000
-```
-
-### 4. Deploy to Vercel
-```bash
-npm i -g vercel
-vercel deploy
-
-# Set environment variables in Vercel dashboard:
-# SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
-# STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
-# ALLOWED_ORIGIN, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
-```
+| Category | Deductible % | ATO Rule |
+|----------|-------------|----------|
+| Work from home | 80% | 67c/hr fixed rate or actual expenses |
+| Vehicle & travel | 90% | Cents-per-km (88c/km, up to 5,000km) |
+| Tools & equipment | 100% | Immediate write-off under $300 |
+| Clothing & uniform | 85% | Distinctive/protective only |
+| Self-education | 75% | Must relate to current job |
+| Phone & internet | 50% | 4-week diary required |
+| Meals & entertainment | 50% | Overnight travel only |
+| Professional services | 90% | Accountant, legal fees |
+| Home office | 67% | Area-based method |
+| Other | 80% | General deductions |
 
 ---
 
-## API Endpoints
+## Commercialisation notes
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET  | `/api/health`                  | —    | Health check |
-| POST | `/api/calculations`            | ✓    | Save a calculation |
-| GET  | `/api/calculations`            | ✓    | List user's calculations |
-| DELETE | `/api/calculations/:id`      | ✓    | Delete a calculation |
-| GET  | `/api/share/:token`            | —    | Public share view |
-| GET  | `/api/calculations/:id/pdf`    | ✓ + paid | Download PDF |
-| POST | `/api/checkout`                | ✓    | Create Stripe session ($4.99) |
-| POST | `/api/webhooks/stripe`         | Stripe sig | Payment webhook |
-| GET  | `/api/me/unlocked`             | ✓    | Check purchase status |
+### Monetisation ideas
+- **Freemium**: free up to 10 receipts/month, $9/month for unlimited
+- **Annual tax report**: $29/year for PDF + accountant-ready export
+- **Accountant plan**: white-label for tax agents managing multiple clients
+- **Stripe integration**: add billing at `app/api/billing/` with Stripe Checkout
+
+### Compliance
+- All deduction rules are based on ATO FY2024–25 guidelines
+- Receipt data should be retained for **5 years** (enforced via `audit_log` append-only table)
+- This app is a **guide only** — users should consult a registered tax agent for large claims
+
+### Scaling checklist
+- [ ] Add Supabase Auth (email/password or magic link)
+- [ ] Add Redis (Upstash) for OCR result caching
+- [ ] Add Stripe for subscription billing
+- [ ] Add push notifications (Vercel Cron) for monthly claim reminders
+- [ ] Add pgvector for semantic search across receipt notes
+- [ ] Mobile app: Expo + React Native wrapping the same API
 
 ---
 
-## Data retention
-- All calculations stored in Supabase PostgreSQL
-- `expires_at` set to 7 years from creation
-- Users can delete their own calculations at any time
-- Supabase handles backups automatically
+## License
 
----
-
-## Monetisation
-- App is fully free to use (calculate + share links)
-- One-time **$4.99** unlocks PDF export + history access
-- Processed via Stripe Checkout
-- Single purchase unlocks all calculations for that account
+MIT — build whatever you like on top of this.
