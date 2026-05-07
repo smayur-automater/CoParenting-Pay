@@ -14,7 +14,7 @@ export const resetPw  = (email)          => supabase.auth.resetPasswordForEmail(
   { redirectTo: `${window.location.origin}/reset-password` });
 
 // ── API calls to backend ──────────────────────────────
-const API = import.meta.env.VITE_API_URL || '/api';
+const API = import.meta.env.VITE_API_URL || '/_/backend';
 
 async function authFetch(path, opts = {}) {
   const { data: { session } } = await supabase.auth.getSession();

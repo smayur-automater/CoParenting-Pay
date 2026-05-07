@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    proxy: { '/api': 'http://localhost:4000' },
+    proxy: { '/_/backend': { target: 'http://localhost:4000', rewrite: (path) => path.replace(/^\/_\/backend/, '') } },
   },
   build: { outDir: 'dist' },
 });
