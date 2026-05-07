@@ -1,158 +1,68 @@
-# SnapClaim AU 🧾
+# SplitFamily — Co-parent Expense Tracker
 
-**AI-powered receipt → tax deduction tracker for Australian freelancers and sole traders.**
+A full-featured React web app for tracking and splitting children's expenses between co-parents.
 
-Snap a receipt → Claude reads it → instant ATO deduction estimate. Auto-categorised, dashboard-ready, CSV-exportable.
+## Features
+- **Google OAuth login** (simulated — swap in real Firebase in production)
+- **Email confirmation flow** (6-digit code, use `123456` in demo)
+- **Co-parent invitation** with secure link
+- **Dashboard** — live balance, monthly/yearly totals, pending flags
+- **Kids profiles** — per-child spend, split visualization, category breakdown
+- **Expenses** — full list with filter tabs, approve/reject with one tap
+- **Reports** — Recharts bar chart, AI insights, audit trail, export
+- **Settings** — split slider, notification toggles, co-parent management
 
----
+## Demo Accounts
+| Email | Role |
+|-------|------|
+| alex@gmail.com | Co-parent A (admin) |
+| jordan@gmail.com | Co-parent B |
 
-## Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS |
-| AI / OCR | Anthropic Claude (`claude-sonnet-4`) |
-| Database | Supabase (PostgreSQL + Auth + RLS) |
-| Charts | Recharts |
-| Hosting | Vercel |
-
----
-
-## Quick start (local)
-
-### 1. Install dependencies
-
+## Quick Start
 ```bash
 npm install
+npm run dev        # development server → http://localhost:5173
+npm run build      # production build → dist/
+npm run preview    # preview production build
 ```
 
-### 2. Set up environment variables
+## Production: Replace Mock Auth with Real Firebase
+1. Install Firebase: `npm install firebase`
+2. Create `src/lib/firebase.js`:
+```js
+import { initializeApp } from 'firebase/app'
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 
-```bash
-cp .env.example .env.local
+const app = initializeApp({ /* your firebase config */ })
+export const auth = getAuth(app)
+export const googleProvider = new GoogleAuthProvider()
+```
+3. In `AuthContext.jsx`, replace `signInWithGoogle` with:
+```js
+import { signInWithPopup } from 'firebase/auth'
+import { auth, googleProvider } from '../lib/firebase'
+
+const result = await signInWithPopup(auth, googleProvider)
+const user = result.user  // { uid, email, displayName, photoURL }
+```
+4. Add Firestore for persistent data:
+```js
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
+const db = getFirestore(app)
+await setDoc(doc(db, 'users', uid), { ... })
 ```
 
-Edit `.env.local` and fill in:
-- `ANTHROPIC_API_KEY` — from [console.anthropic.com](https://console.anthropic.com)
-- `NEXT_PUBLIC_SUPABASE_URL` — from your Supabase project settings
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from your Supabase project settings
+## Email Confirmation
+Use Firebase Auth's `sendEmailVerification()` or a service like SendGrid/Postmark.
 
-### 3. Set up Supabase
+## Deployment
+- **Vercel**: `npm install -g vercel && vercel --prod`  
+- **Netlify**: drag `dist/` folder to netlify.com
+- **Firebase Hosting**: `firebase deploy`
 
-1. Create a free project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the contents of `supabase/schema.sql`
-3. This creates: `receipts`, `tax_profiles`, `audit_log` tables with RLS enabled
-
-### 4. Run locally
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
-
----
-
-## Deploy to Vercel (recommended)
-
-### Option A: One-click deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
-
-1. Push this repo to GitHub
-2. Import to Vercel
-3. Add environment variables in Vercel dashboard:
-   - `ANTHROPIC_API_KEY`
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Deploy
-
-### Option B: Vercel CLI
-
-```bash
-npm i -g vercel
-vercel
-# Follow prompts, then:
-vercel env add ANTHROPIC_API_KEY
-vercel env add NEXT_PUBLIC_SUPABASE_URL
-vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
-vercel --prod
-```
-
----
-
-## Project structure
-
-```
-snapclaim/
-├── app/
-│   ├── api/
-│   │   ├── scan-receipt/route.ts   # Claude OCR endpoint
-│   │   ├── receipts/route.ts       # CRUD for receipts
-│   │   └── export-csv/route.ts     # ATO-ready CSV export
-│   ├── layout.tsx
-│   ├── page.tsx                    # Main app shell
-│   └── globals.css
-├── components/
-│   ├── SnapTab.tsx                 # Upload + AI scan UI
-│   ├── ReceiptsTab.tsx             # Receipt log
-│   ├── DashboardTab.tsx            # Stats + charts
-│   └── SettingsTab.tsx             # Tax profile + config
-├── lib/
-│   ├── tax.ts                      # ATO categories, deduction calc
-│   └── supabase.ts                 # Supabase client
-├── types/
-│   └── index.ts                    # TypeScript interfaces
-├── supabase/
-│   └── schema.sql                  # Database schema + RLS
-├── .env.example
-└── README.md
-```
-
----
-
-## ATO categories supported
-
-| Category | Deductible % | ATO Rule |
-|----------|-------------|----------|
-| Work from home | 80% | 67c/hr fixed rate or actual expenses |
-| Vehicle & travel | 90% | Cents-per-km (88c/km, up to 5,000km) |
-| Tools & equipment | 100% | Immediate write-off under $300 |
-| Clothing & uniform | 85% | Distinctive/protective only |
-| Self-education | 75% | Must relate to current job |
-| Phone & internet | 50% | 4-week diary required |
-| Meals & entertainment | 50% | Overnight travel only |
-| Professional services | 90% | Accountant, legal fees |
-| Home office | 67% | Area-based method |
-| Other | 80% | General deductions |
-
----
-
-## Commercialisation notes
-
-### Monetisation ideas
-- **Freemium**: free up to 10 receipts/month, $9/month for unlimited
-- **Annual tax report**: $29/year for PDF + accountant-ready export
-- **Accountant plan**: white-label for tax agents managing multiple clients
-- **Stripe integration**: add billing at `app/api/billing/` with Stripe Checkout
-
-### Compliance
-- All deduction rules are based on ATO FY2024–25 guidelines
-- Receipt data should be retained for **5 years** (enforced via `audit_log` append-only table)
-- This app is a **guide only** — users should consult a registered tax agent for large claims
-
-### Scaling checklist
-- [ ] Add Supabase Auth (email/password or magic link)
-- [ ] Add Redis (Upstash) for OCR result caching
-- [ ] Add Stripe for subscription billing
-- [ ] Add push notifications (Vercel Cron) for monthly claim reminders
-- [ ] Add pgvector for semantic search across receipt notes
-- [ ] Mobile app: Expo + React Native wrapping the same API
-
----
-
-## License
-
-MIT — build whatever you like on top of this.
+## Tech Stack
+- React 18 + React Router 6
+- Recharts (bar charts)
+- Vite (build tool)
+- CSS Modules
+- Google Fonts: DM Sans + DM Serif Display

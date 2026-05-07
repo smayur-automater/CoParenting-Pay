@@ -1,0 +1,114 @@
+.page { animation: fadeUp 0.35s ease both; }
+
+.header { margin-bottom: 14px; }
+.headerTitle { font-family: var(--font-serif); font-size: 22px; color: var(--ink); }
+.headerSub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+.metricsRow { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.metric { background: var(--white); border-radius: var(--radius-md); padding: 10px 12px; border: 0.5px solid var(--border); }
+.ml { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-ghost); margin-bottom: 4px; }
+.mv { font-size: 18px; font-weight: 500; color: var(--ink); }
+
+.sectionTitle {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-ghost);
+  margin: 16px 0 8px;
+}
+
+.chartCard {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  padding: 16px;
+  margin-bottom: 4px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--border);
+}
+.legendItem { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-mid); }
+.legendDot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.legendAmt { color: var(--ink); font-weight: 500; }
+
+.contribRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.contribCard {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  padding: 14px;
+  text-align: center;
+}
+.contribAvatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  margin: 0 auto 8px;
+}
+.contribName { font-size: 12px; color: var(--ink-soft); }
+.contribAmt { font-size: 20px; font-weight: 500; color: var(--ink); margin: 4px 0 2px; }
+.contribPct { font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; }
+.contribBar { height: 6px; background: var(--cream-dark); border-radius: 100px; overflow: hidden; }
+.contribFill { height: 100%; border-radius: 100px; }
+
+.insightCard {
+  background: #EEEDFE;
+  border: 0.5px solid #AFA9EC;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.insightLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #534AB7;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.insightText { font-size: 12px; color: #3C3489; line-height: 1.55; }
+
+.auditList {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  overflow: hidden;
+}
+
+.auditRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 0.5px solid var(--border);
+}
+.auditRow:last-child { border-bottom: none; }
+
+.auditDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.auditGreen { background: var(--sage); }
+.auditRed { background: var(--rose); }
+
+.auditInfo { flex: 1; }
+.auditText { font-size: 12px; color: var(--ink); }
+.auditText strong { font-weight: 500; }
+.auditText em { font-style: normal; color: var(--ink-mid); }
+.auditDate { font-size: 11px; color: var(--ink-ghost); margin-top: 2px; }
+
+.exportBtn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-mid);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.exportBtn:hover { background: var(--cream); }
